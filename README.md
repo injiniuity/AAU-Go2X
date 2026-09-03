@@ -22,6 +22,8 @@ The package connects the following capabilities into a single interaction flow:
 - Speaks through the robot speaker using generated TTS or pre-registered AudioHub records.
 - Executes Unitree skills such as dancing, stretching, and making a finger heart.
 
+<br><br>
+
 ## 2. End-to-End Flow
 
 Example request:
@@ -50,6 +52,8 @@ Microphone
 
 The LLM does not generate navigation coordinates itself. It calls tools such as `go_to` or `deliver_message_to_person`; coordinates come from `entire_office.json` after name matching.
 
+<br><br>
+
 ## 3. Main Files and Responsibilities
 
 | File or directory | Responsibility | Change it when... |
@@ -70,6 +74,8 @@ The LLM does not generate navigation coordinates itself. It calls tools such as 
 | `services/vision_service.py` | Receives WebRTC camera frames | Changing camera preview or image processing |
 | `services/person_presence_service.py` | Captures two viewpoints and checks seat presence with YOLO/VLM | Changing the seat-presence decision |
 | `Jini/entire_office.json` | Active map ID, initial pose, people, doors, and waypoint poses | Rebuilding a map or changing coordinates |
+
+<br><br>
 
 ## 4. LLM Tools
 
@@ -263,6 +269,8 @@ The following behaviours are not directly called by the user. They run inside `g
 | Door reverse | A door waypoint is present after permission | Sends short wireless-controller inputs to move away from the door |
 | Navigation retry | Navigation returns `NO_PATH`, `FAILURE`, or another configured failure state | Stops/starts navigation and retries up to five times |
 
+<br><br>
+
 ## 5. Name Matching
 
 Names are often misrecognized by speech-to-text, so the system does not rely only on direct string comparison.
@@ -288,6 +296,8 @@ Example log:
 - `gap`: score difference between the best and second-best candidates. A small gap means ambiguous matching is more likely.
 
 The current implementation always returns the nearest candidate rather than rejecting low-confidence matches. If many similar names are added, introduce score/gap thresholds and ask the user for confirmation.
+
+<br><br>
 
 ## 6. Navigation and Maps
 
@@ -352,6 +362,8 @@ When the robot creates a final path immediately after knocking at a pose very cl
 
 Door waypoints and the reverse movement are highly sensitive to map alignment and robot state. The reverse action is not planned distance control; it repeats joystick wireless-controller messages for a fixed duration.
 
+<br><br>
+
 ## 7. Audio and TTS
 
 Generated audio was initially played directly through WebRTC streaming. Playback omissions, clipped starts, and noise were observed, so generated speech was changed to an AudioHub upload-and-playback flow with short leading silence in each WAV file. Because a reply must be generated and uploaded before playback, the robot can take a few seconds to begin speaking.
@@ -382,6 +394,8 @@ LLM final reply or say_message
 
 The door prompts "Knock knock" and "Thank you" are pre-registered AudioHub UUIDs, not newly generated TTS each time.
 
+<br><br>
+
 ## 8. Skills and Emotional Interaction
 
 The available skills are defined in `config.py`:
@@ -403,6 +417,8 @@ The system prompt contains these demo-oriented preferences:
 
 Skill selection is driven by LLM function calling and `SYSTEM_PROMPT`, not a fixed if/else table. Similar requests may therefore produce different but contextually appropriate skill sequences.
 
+<br><br>
+
 ## 9. Running Modes
 
 | Mode | Description |
@@ -423,6 +439,8 @@ The `tools/` directory contains standalone development and maintenance scripts. 
 | `list_audio.py` | Lists AudioHub files on the robot and provides an interactive prompt to upload or delete audio records. | `python tools/list_audio.py` |
 
 `generate_knock_tts.py` needs `MISTRAL_API_KEY`. The other two scripts must only be used when it is safe to connect to the robot and operate its camera or audio library.
+
+<br><br>
 
 ## 10. Issues Observed During Extended Operation
 
@@ -447,6 +465,8 @@ Repeated `NO_PATH` errors are more likely to be caused by localization drift or 
 
 The wake-word model can occasionally miss an activation or command. Check that the intended microphone is correctly connected and selected before use.
 
+<br><br>
+
 ## 11. Reading Logs
 
 | Prefix | Meaning | What to inspect |
@@ -464,6 +484,8 @@ The wake-word model can occasionally miss an activation or command. Check that t
 
 When diagnosing a failure, run with `--log` and preserve one complete block from user command to final state. A single `navigation/set_goal_pose/success` line is not enough to explain the real outcome.
 
+<br><br>
+
 ## 12. Models and External Components
 
 | Role | Current component |
@@ -480,6 +502,8 @@ When diagnosing a failure, run with `--log` and preserve one complete block from
 | Robot connection | [legion1581/unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) |
 
 The `-latest` names are provider aliases rather than fixed model versions. Record the actual execution date and resolved model version when reporting experiments.
+
+<br><br>
 
 ## 13. Pre-Demo Checklist
 
