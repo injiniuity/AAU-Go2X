@@ -6,8 +6,6 @@
 
 `go2_assistant` is the main Python package for controlling a Unitree Go2 EDU robot dog through spoken or typed natural-language commands. After hearing "Hey Max", the robot can deliver a message to someone, navigate to a named location, request permission to enter a room, answer camera questions, inspect whether a seat is occupied, or perform expressive gestures.
 
-This document is an internal technical reference for team discussion and maintenance. For repository-level setup and a shorter project overview, see the parent [project README](../../README.md).
-
 > **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot.
 
 <br><br>
