@@ -509,52 +509,14 @@ Observed sequence:
 [SLAM Nav State] TRACKING
 ```
 
-In this case, permission recognition and the thank-you prompt succeeded. The following navigation either did not lead to physical motion, remained in `TRACKING`, or ended with `NO_PATH`/`FAILURE`.
-
-Possible causes:
-
-- The door pose is too close to a wall or obstacle for the planner.
-- The physical robot position and localized map pose disagree near the door.
-- A previous navigation/localization session is still active.
-- Robot orientation and map yaw differ, so the reverse/avoidance action is not executed as intended.
-- The door, threshold, people, bags, or furniture temporarily block the local planner.
-
-Current mitigations:
-
-- Door approach points such as `door210_waypoint1 -> door210` can be used.
-- A short joystick-controller reverse is attempted after permission, then navigation restarts.
-- Failed navigation retries up to five times.
-- Logs report `WAITING`, `TRACKING`, `REACHED`, `NO_PATH`, and `FAILURE`.
-
-The joystick reverse uses repeated `ly` inputs. Its direction and distance can vary with robot orientation, controller-axis semantics, and joystick-control state, so it is not a guaranteed solution.
+The robot moves close to the wall or door to knock, which can leave the local planner without enough space to create the next route. After permission is granted, the system sends a short reverse joystick-controller input to move away from the wall, then restarts navigation.
 
 <br><br>
 
 
 ### 10.2 `NO_PATH` Increases After Multiple Trips
 
-The most likely causes are localization drift or map mismatch, not LLM reasoning.
-
-- Walking for a long time or slipping can move the estimated pose away from the real pose.
-- The map ID can look correct while PCD, PGM, metadata, and saved poses come from different map versions.
-- Uploading a new map while keeping old `entire_office.json` coordinates can produce valid-looking but unusable goals.
-- `navigation/set_goal_pose` success means command acceptance, not successful path planning.
-
-Operational checks:
-
-- Restart localization if the UI pose visibly differs from the robot's real position.
-- If several targets fail with `NO_PATH`, check the map ID and complete map file bundle first.
-- If only one target fails, check whether its coordinate is close to a wall, table, or inflated obstacle.
-- The point-one 0.30 m close-enough exception applies only when it reaches the target area before `NO_PATH` or `FAILURE`.
-
-<br><br>
-
-
-#### 10.2.1 Temporary Recovery After Rest
-
-During demonstrations, after navigation became unstable, a pause of about five minutes did not resolve the issue, while a pause of about fifteen minutes was followed by normal operation in at least one observed case. This may be related to increased sensor noise from temperature, recovery of internal SLAM/localization state, or a temporary network/service condition.
-
-The current logs do not prove that heat causes sensor noise. To isolate the cause, repeat tests using the same initial pose, map, target coordinates, and indoor environment while recording failure time, rest duration, and robot/sensor temperature when available. For demonstrations, waiting approximately fifteen minutes, then rechecking localization and navigation state, is a safer temporary response than retrying immediately after only five minutes.
+Repeated `NO_PATH` errors are more likely to be caused by localization drift or map mismatch than by LLM reasoning. During demonstrations, turning the robot off for about five minutes did not resolve the problem, while a pause of about fifteen minutes was followed by normal operation in at least one case. We suspect increased sensor noise from temperature or recovery of the internal SLAM/localization state, but this has not been confirmed.
 
 <br><br>
 
