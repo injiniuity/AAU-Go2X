@@ -94,7 +94,7 @@ The LLM can call the following tools:
 | `say_message(message, skill?)` | Spoken message | Speaks at the current location; can optionally execute a skill |
 | `do_skill(skill)` | `Dance1`, `FingerHeart`, etc. | Executes a Unitree sport skill |
 | `describe_view(question)` | Camera question | Sends the latest camera frame to Pixtral |
-| `find_person(description)` | Person or seat description | Checks whether a person is visible near the current seat area |
+| `find_person(description)` | Person description | Checks whether any person is visible in the current camera view |
 | `check_seat_and_report_back(person)` | Person name | Visits the seat, checks it, returns, and reports aloud |
 
 <br><br>
@@ -249,18 +249,17 @@ The visual prompt requires the model to answer only from the image. Identity and
 
 #### `find_person(description)`
 
-**Purpose:** Check whether a person is visible around the current seat area. It does not navigate to a seat.
+**Purpose:** Check whether any person is visible in the current camera view. It detects presence only; it does not identify who the person is or navigate to a seat.
 
 | Item | Details |
 | --- | --- |
 | LLM input | `description: string` |
-| Internal action | Standing frame -> YOLO person/chair boxes -> Sit -> seated frame -> Pixtral VLM final decision -> StandUp -> navigation restart |
-| Current decision policy | YOLO boxes are visual hints; the VLM JSON response decides `present` or `absent` |
-| Main result | `presence: present/absent/unknown`, reason, YOLO/VLM output, and saved image paths |
+| Internal action | Captures camera views at standing and seated heights, then resumes navigation. |
+| Main result | `presence: present/absent/unknown`, reason, and saved image paths |
 
 For normal user requests, `check_seat_and_report_back` is usually more appropriate. `find_person` is useful when the robot is already near the seat.
 
-Example VLM inputs captured at Jini's desk. YOLO boxes are drawn as hints before both images are sent to the VLM.
+Example camera inputs captured at Jini's desk.
 
 | Standing-height view | Sitting-height view |
 | --- | --- |
@@ -287,11 +286,6 @@ Go to Chen's desk, see if he is there, and come back to tell me.
 Is Dimitris at his desk? Please check and report back.
 ```
 
-The robot first saves where it was when the request started, then tries to return there after checking the seat. If that exact saved position is unavailable, it returns to the closest saved named location instead. When localization has drifted, especially in a corridor, the return position can be slightly different from the robot's original physical position.
-
-<br><br>
-
-
 ### 4.2 Automatic Behaviour That Is Not an LLM Tool
 
 The following behaviours are not directly called by the user. They run inside `go_to` and `deliver_message_to_person` when their conditions are met.
@@ -304,19 +298,6 @@ The following behaviours are not directly called by the user. They run inside `g
 | Room-entry permission | Destination belongs to a configured room | Knocks, transcribes/classifies a reply, thanks the responder, then continues |
 | Door reverse | A door waypoint is present after permission | Sends short wireless-controller inputs to move away from the door |
 | Navigation retry | Navigation returns `NO_PATH`, `FAILURE`, or another configured failure state | Stops/starts navigation and retries up to five times |
-
-<br><br>
-
-
-### Message Delivery Sequence
-
-When `deliver_message_to_person("Jeanie", "Hey Jeanie, ...")` is called:
-
-1. `go_to("Jeanie")` runs.
-2. `NameMatchingService` compares `Jeanie` against the registered locations.
-3. It finds the closest canonical name, for example `Jini`, and obtains its pose.
-4. Door approach and room-entry permission run if required.
-5. After arrival, `say_message()` plays the TTS message.
 
 <br><br>
 
@@ -500,16 +481,6 @@ The latest WebRTC camera frame is converted into a JPEG data URL and sent to `pi
 <br><br>
 
 
-### Difference Between `find_person` and `check_seat_and_report_back`
-
-- `find_person`: Checks whether a person is visible near the current camera view.
-- `check_seat_and_report_back`: Navigates to the target seat -> captures two heights -> decides presence -> returns -> speaks a report.
-
-YOLO draws person/chair boxes as visual hints on the images sent to the VLM. The VLM JSON response makes the final `present` or `absent` decision. This is presence detection, not identity recognition.
-
-<br><br>
-
-
 ## 9. Skills and Emotional Interaction
 
 The available skills are defined in `config.py`:
@@ -534,42 +505,14 @@ Skill selection is driven by LLM function calling and `SYSTEM_PROMPT`, not a fix
 <br><br>
 
 
-## 10. Running the System
+## 10. Running Modes
 
-Create a virtual environment and install requirements from the repository root:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-Configure the parent `.env` file:
-
-```env
-MISTRAL_API_KEY=your_mistral_api_key
-UNITREE_ROBOT_IP=192.168.88.154
-```
-
-Run from the `Jini` directory:
-
-```powershell
-cd Jini
-
-# Voice mode: say Hey Max, then speak a command
-python -m go2_assistant
-
-# Text mode: navigation and audio run on the connected robot
-python -m go2_assistant --text
-
-# Test LLM/tool selection without connecting to a robot
-python -m go2_assistant --no-robot --text
-
-# Include detailed logs
-python -m go2_assistant --log
-```
-
-`--text` disables only microphone input. With a robot connection, navigation and TTS still run. `--no-robot` does not use robot navigation, camera input, or AudioHub playback.
+| Mode | Description |
+| --- | --- |
+| Voice mode | Listens for the wake word, then receives a spoken command. |
+| Text mode (`--text`) | Receives typed commands instead of microphone input. |
+| No-robot mode (`--no-robot`) | Tests LLM tool selection without connecting to the robot. |
+| Log mode (`--log`) | Prints detailed processing, navigation, audio, and tool logs. |
 
 ### 10.1 Utility Scripts
 
@@ -694,14 +637,7 @@ The current logs do not prove that heat causes sensor noise. To isolate the caus
 
 ### 11.4 Wake Word or Commands Are Occasionally Missed
 
-One observed cause is an incorrect Windows default microphone selection.
-
-Checks:
-
-1. Confirm that Windows selects the intended microphone as the default input device.
-2. Use `--text` mode to test the LLM, navigation, and TTS independently.
-3. In voice mode, inspect `[Wake word]`, `[Listening...]`, and `[Transcribing...]` in order.
-4. Wait for the TTS cooldown after the robot speaks.
+Intermittent wake-word and command-recognition misses were observed during demonstrations. The cause has not been isolated; microphone selection is only one possible factor.
 
 <br><br>
 
