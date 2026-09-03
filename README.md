@@ -360,28 +360,9 @@ Example:
 
 ### Map Creation, Storage, and Code Integration
 
-Maps are created and managed through the included UI based on [legion1581/unitree_ui](https://github.com/legion1581/unitree_ui). The UI communicates with the robot mapping server. `entire_office.json` is not the map itself; it stores the map ID and named poses used by language commands.
+Maps are created and saved through [unitree_ui](https://github.com/legion1581/unitree_ui). The UI uploads the map to the robot and activates it.
 
-```text
-Create a map in unitree_ui
-  -> robot: mapping/start
-  -> move the robot while it builds a LiDAR map
-  -> Stop & Save
-  -> robot: mapping/stop
-  -> UI creates a map ID and sends common/set_map_id/<id>
-  -> UI stores map.pcd, map.pgm, and map.txt from the robot slot in browser local cache
-  -> Export a ZIP map bundle for backup
-
-Run go2_assistant
-  -> load map.id and named poses from Jini/entire_office.json
-  -> robot: common/set_map_id/<map.id>
-  -> localization/set_initial_pose/<initial pose>
-  -> use named poses for navigation/set_goal_pose/<x>/<y>/<yaw>
-```
-
-Keep the exported ZIP when a map is created. To reuse a map on another computer or in a new browser session, use `Import .zip` and Load it. The UI uploads `map.pcd`, `map.pgm`, and `map.txt` back to the robot, then sends `common/set_map_id/<id>`.
-
-Sending only `common/set_map_id` changes the map label; it does not restore the map files. If the robot slot does not contain the same PCD/PGM/TXT bundle, localization or navigation can fail even when the map ID appears correct. When creating or loading a different map, update the `map.id`, initial pose, and every waypoint in `entire_office.json` together.
+`entire_office.json` stores the map ID and named locations, such as Jini's seat or point one, that the assistant uses for navigation.
 
 <br><br>
 
@@ -444,8 +425,6 @@ Generated audio was initially played directly through WebRTC streaming. Playback
 - STT: `voxtral-mini-latest`
 - Maximum recording after wake-word detection: 8 seconds
 - End-of-speech rule: configured period of silence
-
-Connecting a Bluetooth microphone is not enough by itself. If Windows still selects the laptop microphone as the default input device, the laptop microphone is used.
 
 <br><br>
 
