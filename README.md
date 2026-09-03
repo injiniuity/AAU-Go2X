@@ -8,6 +8,8 @@
 
 > **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot.
 
+<br><br>
+
 ## 1. System Capabilities
 
 The package connects the following capabilities into a single interaction flow:
