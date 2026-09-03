@@ -411,7 +411,7 @@ Door waypoints and the reverse movement are highly sensitive to map alignment an
 
 ## 7. Audio and TTS
 
-Generated audio was initially played directly through WebRTC streaming. Playback omissions, clipped starts, and noise were observed, so generated speech was changed to an AudioHub upload-and-playback flow. Even with this method, the start of generated speech can occasionally be clipped; a short leading silence is prepended to generated WAV files.
+Generated audio was initially played directly through WebRTC streaming. Playback omissions, clipped starts, and noise were observed, so generated speech was changed to an AudioHub upload-and-playback flow with short leading silence in each WAV file. Because a reply must be generated and uploaded before playback, the robot can take a few seconds to begin speaking.
 
 <br><br>
 
@@ -515,45 +515,7 @@ The issues below were observed during demonstrations. Some depend on the Unitree
 <br><br>
 
 
-### 11.1 TTS Reports Success but No Sound Is Heard
-
-Example log:
-
-```text
-[TTS] Ready, uploading to AudioHub...
-[AudioHub] Waiting for uuid ... playback state...
-[AudioHub] Started uuid ...
-[AudioHub] Done
-```
-
-This confirms that AudioHub reported playback state. It does not prove that audible sound reached the physical speaker.
-
-Possible causes:
-
-- An outgoing WebRTC audio track or robot audio channel becomes unstable during extended operation.
-- AudioHub record-list updates are delayed after upload, so a new UUID is missed or selected incorrectly.
-- Playback-state messages are delayed or missing.
-- Robot speaker channel, volume, network, or internal resource contention after navigation/skills.
-
-Current mitigations:
-
-- Generated TTS uses AudioHub upload/playback.
-- The audio list is compared before and after upload to find the new UUID.
-- The first audio-list record is used as a fallback if name matching fails.
-- Uploaded records and temporary WAV files are removed after playback.
-- Wake-word listening pauses during TTS to reduce self-triggering.
-
-Potential improvements:
-
-- Validate playback through a more reliable device-level or loopback signal.
-- Periodically health-check and reconnect the audio channel/outgoing track during long runs.
-- Add explicit retry/status reporting when UUID discovery or playback fails.
-- Use pre-uploaded AudioHub UUIDs for key demo lines to reduce variability.
-
-<br><br>
-
-
-### 11.2 Robot Stops After Entry Permission
+### 11.1 Robot Stops After Entry Permission
 
 Observed sequence:
 
@@ -586,7 +548,7 @@ The joystick reverse uses repeated `ly` inputs. Its direction and distance can v
 <br><br>
 
 
-### 11.3 `NO_PATH` Increases After Multiple Trips
+### 11.2 `NO_PATH` Increases After Multiple Trips
 
 The most likely causes are localization drift or map mismatch, not LLM reasoning.
 
@@ -605,7 +567,7 @@ Operational checks:
 <br><br>
 
 
-#### 11.3.1 Temporary Recovery After Rest
+#### 11.2.1 Temporary Recovery After Rest
 
 During demonstrations, after navigation became unstable, a pause of about five minutes did not resolve the issue, while a pause of about fifteen minutes was followed by normal operation in at least one observed case. This may be related to increased sensor noise from temperature, recovery of internal SLAM/localization state, or a temporary network/service condition.
 
@@ -614,14 +576,14 @@ The current logs do not prove that heat causes sensor noise. To isolate the caus
 <br><br>
 
 
-### 11.4 Wake Word or Commands Are Occasionally Missed
+### 11.3 Wake Word or Commands Are Occasionally Missed
 
-Intermittent wake-word and command-recognition misses were observed during demonstrations. The cause has not been isolated; microphone selection is only one possible factor.
+The wake-word model can occasionally miss an activation or command. Check that the intended microphone is correctly connected and selected before use.
 
 <br><br>
 
 
-### 11.5 Mistral API 503
+### 11.4 Mistral API 503
 
 `Status 503: Service unavailable` is normally a temporary provider-side error rather than a local logic error. The current request can terminate immediately, so a robust demonstration build should add exponential-backoff retries for chat, STT, VLM, and TTS requests.
 
@@ -648,21 +610,7 @@ When diagnosing a failure, run with `--log` and preserve one complete block from
 <br><br>
 
 
-## 13. Team Improvement Topics
-
-1. **Extended-operation reliability:** Define health checks and automatic recovery for WebRTC, AudioHub, microphone, and SLAM services.
-2. **Navigation reliability:** Version map files and poses together; block stale waypoints after a map change.
-3. **Name-matching safety:** Add score/gap thresholds and confirmation questions such as "Did you mean Jini?"
-4. **Canonical names in speech:** Decide whether message text should replace a misrecognized recipient name with the matched canonical name.
-5. **Audio verification:** Find a more reliable playback-success signal than AudioHub `Started`/`Done`.
-6. **API recovery:** Add retry, fallback responses, and user feedback for Mistral 429, 503, and timeout failures.
-7. **Test separation:** Keep independent tests for STT, LLM tool calling, TTS/AudioHub, and SLAM navigation, plus integration scenarios.
-8. **Safety policy:** Define movement checks, emergency-stop procedures, and speed/area limits for shared spaces.
-
-<br><br>
-
-
-## 14. Models and External Components
+## 13. Models and External Components
 
 | Role | Current component |
 | --- | --- |
@@ -682,7 +630,7 @@ The `-latest` names are provider aliases rather than fixed model versions. Recor
 <br><br>
 
 
-## 15. Pre-Demo Checklist
+## 14. Pre-Demo Checklist
 
 - Confirm `MISTRAL_API_KEY` and `UNITREE_ROBOT_IP` in `.env`.
 - Confirm that the robot and laptop are on the same network.
