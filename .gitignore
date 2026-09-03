@@ -1,0 +1,14 @@
+# Python bytecode and local tool caches
+__pycache__/
+*.py[cod]
+
+# Runtime artefacts generated on the robot-control workstation
+tts_runtime_uploads/
+find_person_vlm_captures/
+
+# Local environment and editor settings
+.env
+.venv/
+venv/
+.vscode/
+.idea/
