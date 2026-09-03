@@ -258,6 +258,12 @@ The visual prompt requires the model to answer only from the image. Identity and
 
 For normal user requests, `check_seat_and_report_back` is usually more appropriate. `find_person` is useful when the robot is already near the seat.
 
+Example VLM inputs captured at Jini's desk. YOLO boxes are drawn as hints before both images are sent to the VLM.
+
+| Standing-height view | Sitting-height view |
+| --- | --- |
+| ![Standing-height VLM input at Jini's desk](assets/find_person_jini_before_sit.jpg) | ![Sitting-height VLM input at Jini's desk](assets/find_person_jini_after_sit.jpg) |
+
 <br><br>
 
 
