@@ -8,9 +8,6 @@
 
 > **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot.
 
-<br><br>
-
-
 ## 1. System Capabilities
 
 The package connects the following capabilities into a single interaction flow:
@@ -24,9 +21,6 @@ The package connects the following capabilities into a single interaction flow:
 - Answers visual questions and checks whether a person is visible near a seat.
 - Speaks through the robot speaker using generated TTS or pre-registered AudioHub records.
 - Executes Unitree skills such as dancing, stretching, and making a finger heart.
-
-<br><br>
-
 
 ## 2. End-to-End Flow
 
@@ -56,9 +50,6 @@ Microphone
 
 The LLM does not generate navigation coordinates itself. It calls tools such as `go_to` or `deliver_message_to_person`; coordinates come from `entire_office.json` after name matching.
 
-<br><br>
-
-
 ## 3. Main Files and Responsibilities
 
 | File or directory | Responsibility | Change it when... |
@@ -80,9 +71,6 @@ The LLM does not generate navigation coordinates itself. It calls tools such as 
 | `services/person_presence_service.py` | Captures two viewpoints and checks seat presence with YOLO/VLM | Changing the seat-presence decision |
 | `Jini/entire_office.json` | Active map ID, initial pose, people, doors, and waypoint poses | Rebuilding a map or changing coordinates |
 
-<br><br>
-
-
 ## 4. LLM Tools
 
 The LLM can call the following tools:
@@ -97,13 +85,7 @@ The LLM can call the following tools:
 | `find_person(description)` | Person description | Checks whether any person is visible in the current camera view |
 | `check_seat_and_report_back(person)` | Person name | Visits the seat, checks it, returns, and reports aloud |
 
-<br><br>
-
-
 ### 4.1 Tool Inputs, Internal Flow, and User Commands
-
-<br><br>
-
 
 #### `go_to(location)`
 
@@ -127,9 +109,6 @@ Can you go to the corridor?
 ```
 
 `Jini's seat` is normalized and matched to the `Jini` pose in JSON. A name such as `point one` is handled as a registered location name, not as a numeric index into an arbitrary waypoint list.
-
-<br><br>
-
 
 #### `deliver_message_to_person(person, message, skill=None)`
 
@@ -161,9 +140,6 @@ deliver_message_to_person(
 
 For delivery requests, the LLM considers the purpose and social context. Plain announcements are normally delivered without unnecessary gestures, while welcoming or greeting requests can include `Hello` or `FingerHeart`. For example, "welcome Jini" can result in navigation -> greeting -> welcome message -> finger heart.
 
-<br><br>
-
-
 #### `say_message(message, skill=None)`
 
 **Purpose:** Speak without moving from the current position.
@@ -183,9 +159,6 @@ Tell us a short welcome message.
 ```
 
 `say_message` is also used for emotional responses and guidance messages.
-
-<br><br>
-
 
 #### `do_skill(skill)`
 
@@ -221,9 +194,6 @@ Sit down and get some rest.
 Stand up, please.
 ```
 
-<br><br>
-
-
 #### `describe_view(question)`
 
 **Purpose:** Answer a question about the latest front-camera image.
@@ -244,9 +214,6 @@ Can you describe the room?
 
 The visual prompt requires the model to answer only from the image. Identity and information outside the camera view are not guaranteed.
 
-<br><br>
-
-
 #### `find_person(description)`
 
 **Purpose:** Check whether any person is visible in the current camera view. It detects presence only; it does not identify who the person is or navigate to a seat.
@@ -264,9 +231,6 @@ Example camera inputs captured at Jini's desk.
 | Standing-height view | Sitting-height view |
 | --- | --- |
 | ![Standing-height VLM input at Jini's desk](assets/find_person_jini_before_sit.jpg) | ![Sitting-height VLM input at Jini's desk](assets/find_person_jini_after_sit.jpg) |
-
-<br><br>
-
 
 #### `check_seat_and_report_back(person)`
 
@@ -299,9 +263,6 @@ The following behaviours are not directly called by the user. They run inside `g
 | Door reverse | A door waypoint is present after permission | Sends short wireless-controller inputs to move away from the door |
 | Navigation retry | Navigation returns `NO_PATH`, `FAILURE`, or another configured failure state | Stops/starts navigation and retries up to five times |
 
-<br><br>
-
-
 ## 5. Name Matching
 
 Names are often misrecognized by speech-to-text, so the system does not rely only on direct string comparison.
@@ -328,13 +289,7 @@ Example log:
 
 The current implementation always returns the nearest candidate rather than rejecting low-confidence matches. If many similar names are added, introduce score/gap thresholds and ask the user for confirmation.
 
-<br><br>
-
-
 ## 6. Navigation and Maps
-
-<br><br>
-
 
 ### Map Data
 
@@ -355,17 +310,11 @@ Example:
 }
 ```
 
-<br><br>
-
-
 ### Map Creation, Storage, and Code Integration
 
 Maps are created and saved through [unitree_ui](https://github.com/legion1581/unitree_ui). The UI uploads the map to the robot and activates it.
 
 `entire_office.json` stores the map ID and named locations, such as Jini's seat or point one, that the assistant uses for navigation.
-
-<br><br>
-
 
 ### SLAM Commands Sent to the Robot
 
@@ -388,9 +337,6 @@ A successful `navigation/set_goal_pose` log means that the robot accepted the co
 
 Failure states include `NO_PATH`, `FAILURE`, `TIMEOUT`, `GOAL_OCCUPIED`, and `ABNORMAL`. General navigation retries up to five times. `point one` is a special case: if it ends in `NO_PATH` or `FAILURE` within 0.30 m of its goal, it is treated as reached.
 
-<br><br>
-
-
 ### Door-Entry Flow
 
 For a destination in a registered room beyond a door:
@@ -406,15 +352,9 @@ When the robot creates a final path immediately after knocking at a pose very cl
 
 Door waypoints and the reverse movement are highly sensitive to map alignment and robot state. The reverse action is not planned distance control; it repeats joystick wireless-controller messages for a fixed duration.
 
-<br><br>
-
-
 ## 7. Audio and TTS
 
 Generated audio was initially played directly through WebRTC streaming. Playback omissions, clipped starts, and noise were observed, so generated speech was changed to an AudioHub upload-and-playback flow with short leading silence in each WAV file. Because a reply must be generated and uploaded before playback, the robot can take a few seconds to begin speaking.
-
-<br><br>
-
 
 ### Input
 
@@ -425,9 +365,6 @@ Generated audio was initially played directly through WebRTC streaming. Playback
 - STT: `voxtral-mini-latest`
 - Maximum recording after wake-word detection: 8 seconds
 - End-of-speech rule: configured period of silence
-
-<br><br>
-
 
 ### Output
 
@@ -444,9 +381,6 @@ LLM final reply or say_message
 ```
 
 The door prompts "Knock knock" and "Thank you" are pre-registered AudioHub UUIDs, not newly generated TTS each time.
-
-<br><br>
-
 
 ## 8. Skills and Emotional Interaction
 
@@ -469,9 +403,6 @@ The system prompt contains these demo-oriented preferences:
 
 Skill selection is driven by LLM function calling and `SYSTEM_PROMPT`, not a fixed if/else table. Similar requests may therefore produce different but contextually appropriate skill sequences.
 
-<br><br>
-
-
 ## 9. Running Modes
 
 | Mode | Description |
@@ -493,9 +424,6 @@ The `tools/` directory contains standalone development and maintenance scripts. 
 
 `generate_knock_tts.py` needs `MISTRAL_API_KEY`. The other two scripts must only be used when it is safe to connect to the robot and operate its camera or audio library.
 
-<br><br>
-
-
 ## 10. Issues Observed During Extended Operation
 
 ### 10.1 Robot Stops After Entry Permission
@@ -511,22 +439,13 @@ Observed sequence:
 
 The robot moves close to the wall or door to knock, which can leave the local planner without enough space to create the next route. After permission is granted, the system sends a short reverse joystick-controller input to move away from the wall, then restarts navigation.
 
-<br><br>
-
-
 ### 10.2 `NO_PATH` Increases After Multiple Trips
 
 Repeated `NO_PATH` errors are more likely to be caused by localization drift or map mismatch than by LLM reasoning. During demonstrations, turning the robot off for about five minutes did not resolve the problem, while a pause of about fifteen minutes was followed by normal operation in at least one case. We suspect increased sensor noise from temperature or recovery of the internal SLAM/localization state, but this has not been confirmed.
 
-<br><br>
-
-
 ### 10.3 Wake Word or Commands Are Occasionally Missed
 
 The wake-word model can occasionally miss an activation or command. Check that the intended microphone is correctly connected and selected before use.
-
-<br><br>
-
 
 ## 11. Reading Logs
 
@@ -545,9 +464,6 @@ The wake-word model can occasionally miss an activation or command. Check that t
 
 When diagnosing a failure, run with `--log` and preserve one complete block from user command to final state. A single `navigation/set_goal_pose/success` line is not enough to explain the real outcome.
 
-<br><br>
-
-
 ## 12. Models and External Components
 
 | Role | Current component |
@@ -564,9 +480,6 @@ When diagnosing a failure, run with `--log` and preserve one complete block from
 | Robot connection | [legion1581/unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) |
 
 The `-latest` names are provider aliases rather than fixed model versions. Record the actual execution date and resolved model version when reporting experiments.
-
-<br><br>
-
 
 ## 13. Pre-Demo Checklist
 
