@@ -1,6 +1,8 @@
 # `go2_assistant`: Unitree Go2 Speech Interaction System
 
-![Unitree Go2 speech interaction system diagram](assets/unitree_go2x_diagram.jpg)
+[![Unitree Go2 speech interaction system diagram](assets/unitree_go2x_diagram.jpg)](assets/unitree_go2x_diagram.jpg)
+
+*Click the diagram to open the full-resolution image.*
 
 `go2_assistant` is the main Python package for controlling a Unitree Go2 EDU robot dog through spoken or typed natural-language commands. After hearing "Hey Max", the robot can deliver a message to someone, navigate to a named location, request permission to enter a room, answer camera questions, inspect whether a seat is occupied, or perform expressive gestures.
 
