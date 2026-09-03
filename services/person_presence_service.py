@@ -36,10 +36,8 @@ class PersonPresenceService:
         self.complete_chat = complete_chat
 
     @staticmethod
-    def resolve_presence(raw_answer: str, person_count: int) -> tuple[str, str]:
-        """Prefer local detection, then the VLM's required JSON, otherwise stay uncertain."""
-        if person_count > 0:
-            return "present", "A person was detected in the camera view near the seat."
+    def resolve_presence(raw_answer: str) -> tuple[str, str]:
+        """Use the VLM JSON result; YOLO boxes are visual hints only."""
         try:
             payload = json.loads(raw_answer)
         except (TypeError, json.JSONDecodeError):
@@ -105,7 +103,7 @@ class PersonPresenceService:
             )
             raw_answer = response.choices[0].message.content.strip()
             person_count = before_counts.get("person", 0) + after_counts.get("person", 0)
-            presence, reason = self.resolve_presence(raw_answer, person_count)
+            presence, reason = self.resolve_presence(raw_answer)
             answer = f"{description} appears to be at the seat." if presence == "present" else (
                 f"{description} does not appear to be at the seat." if presence == "absent" else f"I could not reliably determine whether {description} is at the seat."
             )

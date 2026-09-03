@@ -241,8 +241,8 @@ The visual prompt requires the model to answer only from the image. Identity and
 | Item | Details |
 | --- | --- |
 | LLM input | `description: string` |
-| Internal action | Standing frame -> YOLO person/chair detection -> Sit -> seated frame -> Pixtral decision -> StandUp -> navigation restart |
-| Current decision policy | If any visible body part is detected in either image, `present` is preferred |
+| Internal action | Standing frame -> YOLO person/chair boxes -> Sit -> seated frame -> Pixtral VLM final decision -> StandUp -> navigation restart |
+| Current decision policy | YOLO boxes are visual hints; the VLM JSON response decides `present` or `absent` |
 | Main result | `presence: present/absent/unknown`, reason, YOLO/VLM output, and saved image paths |
 
 For normal user requests, `check_seat_and_report_back` is usually more appropriate. `find_person` is useful when the robot is already near the seat.
@@ -473,7 +473,7 @@ The latest WebRTC camera frame is converted into a JPEG data URL and sent to `pi
 - `find_person`: Checks whether a person is visible near the current camera view.
 - `check_seat_and_report_back`: Navigates to the target seat -> captures two heights -> decides presence -> returns -> speaks a report.
 
-If YOLO detects any `person`, the current policy prioritizes `present`. Legs or a partial upper body are enough to count as present. This is presence detection, not identity recognition.
+YOLO draws person/chair boxes as visual hints on the images sent to the VLM. The VLM JSON response makes the final `present` or `absent` decision. This is presence detection, not identity recognition.
 
 
 
@@ -672,7 +672,7 @@ Checks:
 | `[Door]` | Door approach, reply, permission | Navigation state after `permission=allowed` |
 | `[AudioHub]` | Upload, UUID lookup, playback state | UUID discovery and `Started`/`Done` |
 | `[TTS]` | Generated-speech stage | Whether generation or upload stopped |
-| `[find_person]` | Seat-check progress | Whether YOLO detected a person |
+| `[find_person]` | Seat-check progress | YOLO hint count and final VLM presence result |
 
 When diagnosing a failure, run with `--log` and preserve one complete block from user command to final state. A single `navigation/set_goal_pose/success` line is not enough to explain the real outcome.
 
