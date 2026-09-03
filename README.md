@@ -571,6 +571,18 @@ python -m go2_assistant --log
 
 `--text` disables only microphone input. With a robot connection, navigation and TTS still run. `--no-robot` does not use robot navigation, camera input, or AudioHub playback.
 
+### 10.1 Utility Scripts
+
+The `tools/` directory contains standalone development and maintenance scripts. The camera and AudioHub tools require a local checkout of [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) and a connection to the robot.
+
+| Script | Purpose | Example |
+| --- | --- | --- |
+| `generate_knock_tts.py` | Generates `tts/knock_knock.wav` using the configured Mistral TTS voice. | `python tools/generate_knock_tts.py` |
+| `go2_yolo_person_chair.py` | Opens the Go2 front-camera stream, runs YOLO, and displays `person` and `chair` detections. Press `Q` to close the preview. | `python tools/go2_yolo_person_chair.py --robot-ip 192.168.88.154` |
+| `list_audio.py` | Lists AudioHub files on the robot and provides an interactive prompt to upload or delete audio records. | `python tools/list_audio.py` |
+
+`generate_knock_tts.py` needs `MISTRAL_API_KEY`. The other two scripts must only be used when it is safe to connect to the robot and operate its camera or audio library.
+
 <br><br>
 
 
