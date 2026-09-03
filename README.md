@@ -448,19 +448,7 @@ The door prompts "Knock knock" and "Thank you" are pre-registered AudioHub UUIDs
 <br><br>
 
 
-## 8. Vision and Seat Inspection
-
-<br><br>
-
-
-### `describe_view`
-
-The latest WebRTC camera frame is converted into a JPEG data URL and sent to `pixtral-12b-latest` with the user's question. It is used for questions about visible objects and scenes.
-
-<br><br>
-
-
-## 9. Skills and Emotional Interaction
+## 8. Skills and Emotional Interaction
 
 The available skills are defined in `config.py`:
 
@@ -484,7 +472,7 @@ Skill selection is driven by LLM function calling and `SYSTEM_PROMPT`, not a fix
 <br><br>
 
 
-## 10. Running Modes
+## 9. Running Modes
 
 | Mode | Description |
 | --- | --- |
@@ -493,7 +481,7 @@ Skill selection is driven by LLM function calling and `SYSTEM_PROMPT`, not a fix
 | No-robot mode (`--no-robot`) | Tests LLM tool selection without connecting to the robot. |
 | Log mode (`--log`) | Prints detailed processing, navigation, audio, and tool logs. |
 
-### 10.1 Utility Scripts
+### 9.1 Utility Scripts
 
 The `tools/` directory contains standalone development and maintenance scripts. The camera and AudioHub tools require a local checkout of [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) and a connection to the robot.
 
@@ -508,14 +496,9 @@ The `tools/` directory contains standalone development and maintenance scripts. 
 <br><br>
 
 
-## 11. Issues Observed During Extended Operation
+## 10. Issues Observed During Extended Operation
 
-The issues below were observed during demonstrations. Some depend on the Unitree SLAM or AudioHub internal state, so they are not all proven to be caused by this code alone.
-
-<br><br>
-
-
-### 11.1 Robot Stops After Entry Permission
+### 10.1 Robot Stops After Entry Permission
 
 Observed sequence:
 
@@ -548,7 +531,7 @@ The joystick reverse uses repeated `ly` inputs. Its direction and distance can v
 <br><br>
 
 
-### 11.2 `NO_PATH` Increases After Multiple Trips
+### 10.2 `NO_PATH` Increases After Multiple Trips
 
 The most likely causes are localization drift or map mismatch, not LLM reasoning.
 
@@ -567,7 +550,7 @@ Operational checks:
 <br><br>
 
 
-#### 11.2.1 Temporary Recovery After Rest
+#### 10.2.1 Temporary Recovery After Rest
 
 During demonstrations, after navigation became unstable, a pause of about five minutes did not resolve the issue, while a pause of about fifteen minutes was followed by normal operation in at least one observed case. This may be related to increased sensor noise from temperature, recovery of internal SLAM/localization state, or a temporary network/service condition.
 
@@ -576,21 +559,14 @@ The current logs do not prove that heat causes sensor noise. To isolate the caus
 <br><br>
 
 
-### 11.3 Wake Word or Commands Are Occasionally Missed
+### 10.3 Wake Word or Commands Are Occasionally Missed
 
 The wake-word model can occasionally miss an activation or command. Check that the intended microphone is correctly connected and selected before use.
 
 <br><br>
 
 
-### 11.4 Mistral API 503
-
-`Status 503: Service unavailable` is normally a temporary provider-side error rather than a local logic error. The current request can terminate immediately, so a robust demonstration build should add exponential-backoff retries for chat, STT, VLM, and TTS requests.
-
-<br><br>
-
-
-## 12. Reading Logs
+## 11. Reading Logs
 
 | Prefix | Meaning | What to inspect |
 | --- | --- | --- |
@@ -610,7 +586,7 @@ When diagnosing a failure, run with `--log` and preserve one complete block from
 <br><br>
 
 
-## 13. Models and External Components
+## 12. Models and External Components
 
 | Role | Current component |
 | --- | --- |
@@ -630,7 +606,7 @@ The `-latest` names are provider aliases rather than fixed model versions. Recor
 <br><br>
 
 
-## 14. Pre-Demo Checklist
+## 13. Pre-Demo Checklist
 
 - Confirm `MISTRAL_API_KEY` and `UNITREE_ROBOT_IP` in `.env`.
 - Confirm that the robot and laptop are on the same network.
