@@ -4,7 +4,7 @@
 
 This document is an internal technical reference for team discussion and maintenance. For repository-level setup and a shorter project overview, see the parent [project README](../../README.md).
 
-> **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot. To run the system, the deployment environment must also provide its own credentials, active map JSON, wake-word model, and prompt-audio files.
+> **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot.
 
 <br><br>
 
