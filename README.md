@@ -4,7 +4,7 @@
 
 This document is an internal technical reference for team discussion and maintenance. For repository-level setup and a shorter project overview, see the parent [project README](../../README.md).
 
-> **Repository scope:** This repository contains the `go2_assistant` Python package only. It does not include credentials, the active map JSON, the wake-word model, pre-recorded prompt audio, or the local `unitree_webrtc_connect` dependency. These assets must be supplied by the deployment environment.
+> **External components used:** This assistant was developed with [unitree_ui](https://github.com/legion1581/unitree_ui) for map creation and management, and [unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect) for the WebRTC connection to the robot. To run the system, the deployment environment must also provide its own credentials, active map JSON, wake-word model, and prompt-audio files.
 
 <br><br>
 
@@ -285,7 +285,7 @@ Go to Chen's desk, see if he is there, and come back to tell me.
 Is Dimitris at his desk? Please check and report back.
 ```
 
-If a fresh starting pose is available, it is used for the return trip. Otherwise, the closest named location is used. A robot in a corridor or a robot with inaccurate localization may not return to exactly the same physical position.
+The robot first saves where it was when the request started, then tries to return there after checking the seat. If that exact saved position is unavailable, it returns to the closest saved named location instead. When localization has drifted, especially in a corridor, the return position can be slightly different from the robot's original physical position.
 
 <br><br>
 
